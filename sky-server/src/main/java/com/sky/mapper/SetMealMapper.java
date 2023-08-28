@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface SetMealMapper {
 
@@ -41,8 +43,32 @@ public interface SetMealMapper {
 
     /**
      * 套餐分页查询
+     *
      * @param setmealPageQueryDTO
      * @return
      */
     Page<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 根据多个id查询套餐
+     *
+     * @param ids
+     * @return
+     */
+    List<Setmeal> getByIds(List<Long> ids);
+
+    /**
+     * 根据多个id删除套餐
+     *
+     * @param ids
+     */
+    void delete(List<Long> ids);
+
+    /**
+     * 修改套餐内容
+     *
+     * @param setmeal
+     */
+    @AutoFill(OperationType.UPDATE)
+    void update(Setmeal setmeal);
 }

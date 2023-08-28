@@ -5,6 +5,8 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.result.PageResult;
 
+import java.util.List;
+
 
 public interface SetMealService {
     /**
@@ -27,4 +29,21 @@ public interface SetMealService {
      */
     PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
 
+    /**
+     * 批量删除套餐
+     * @param ids
+     */
+    void delete(List<Long> ids);
+
+    /**
+     * 更新套餐
+     * @param setmealDTO
+     */
+    void update(SetmealDTO setmealDTO);
+
+    /**
+     * 套餐起售、停售
+     * @param status
+     */
+    void setStatus(Integer status,Long id);
 }

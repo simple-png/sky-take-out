@@ -2,10 +2,16 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
+import com.sky.exception.SetmealEnableFailedException;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
@@ -18,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -27,6 +34,8 @@ public class SetMealServiceImpl implements SetMealService {
     private SetMealMapper setmealMapper;
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+    @Autowired
+    private DishMapper dishMapper;
 
     @Transactional
     @Override
@@ -59,4 +68,59 @@ public class SetMealServiceImpl implements SetMealService {
         Page<SetmealVO> page = setmealMapper.pageQuery(setmealPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
+
+    @Transactional
+    @Override
+    public void delete(List<Long> ids) {
+        List<Setmeal> setmeals = setmealMapper.getByIds(ids);
+        log.info("setmeals:{}", setmeals);
+        setmeals.forEach(setmeal -> {
+            // 查看是否启售中
+            if (StatusConstant.ENABLE.equals(setmeal.getStatus())) {
+                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
+            }
+            // 删除套餐关联内容
+            Long setmealId = setmeal.getId();
+            List<SetmealDish> setmealDishes = setmealDishMapper.getSetmealIdsBySetmealId(setmealId);
+            if (setmealDishes != null && !setmealDishes.isEmpty()) {
+                setmealDishMapper.delete(setmealId);
+            }
+        });
+        //删除套餐
+        setmealMapper.delete(ids);
+    }
+
+    @Transactional
+    @Override
+    public void update(SetmealDTO setmealDTO) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.update(setmeal);
+        setmealDishMapper.delete(setmeal.getId());
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        if (setmealDishes != null && !setmealDishes.isEmpty()) {
+            setmealDishes.forEach(setmealDish -> {
+                setmealDish.setSetmealId(setmeal.getId());
+            });
+            setmealDishMapper.add(setmealDishes);
+        }
+    }
+
+    @Override
+    public void setStatus(Integer status, Long id) {
+        Setmeal setmeal = setmealMapper.getById(id);
+        List<SetmealDish> setmealDishes = setmealDishMapper.getSetmealIdsBySetmealId(id);
+
+        boolean anyDisabledDish = setmealDishes.stream()
+                .map(SetmealDish::getDishId)
+                .map(dishMapper::getById)
+                .anyMatch(dish -> dish.getStatus().equals(StatusConstant.DISABLE));
+        if (anyDisabledDish) {
+            throw new SetmealEnableFailedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+        }
+
+        setmeal.setStatus(status);
+        setmealMapper.update(setmeal);
+    }
+
 }
