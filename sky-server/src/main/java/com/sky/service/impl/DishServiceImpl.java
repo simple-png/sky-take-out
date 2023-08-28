@@ -107,16 +107,30 @@ public class DishServiceImpl implements DishService {
     @Override
     public void updateDishWithFlavor(DishDTO dishDTO) {
         Dish dish = new Dish();
-        BeanUtils.copyProperties(dishDTO,dish);
+        BeanUtils.copyProperties(dishDTO, dish);
         dishMapper.update(dish);
         dishFlavorMapper.deleteByDishId(dishDTO.getId());
         List<DishFlavor> flavors = dishDTO.getFlavors();
-        if (flavors!=null&&!flavors.isEmpty()){
-            flavors.forEach(flavor->{
+        if (flavors != null && !flavors.isEmpty()) {
+            flavors.forEach(flavor -> {
                 flavor.setDishId(dishDTO.getId());
             });
             dishFlavorMapper.insertDishFlavor(flavors);
         }
+    }
+
+    @Override
+    public List<Dish> selectByCategoryId(Long categoryId) {
+        return dishMapper.selectByCategoryId(categoryId);
+    }
+
+    @Override
+    public void setStatus(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+        dishMapper.setStatus(dish);
     }
 
 

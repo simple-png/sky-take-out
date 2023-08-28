@@ -8,10 +8,9 @@ import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.enumeration.OperationType;
 import com.sky.vo.DishVO;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 @Mapper
 public interface DishMapper {
@@ -50,4 +49,10 @@ public interface DishMapper {
 
     @AutoFill(OperationType.UPDATE)
     void update(Dish dish);
+
+    @Select("select dish.* from dish left join category c on dish.category_id = c.id where c.id=#{categoryId}")
+    List<Dish> selectByCategoryId(Long categoryId);
+
+    @Update("update dish set status=#{status} where id=#{id}")
+    void setStatus(Dish dish);
 }
