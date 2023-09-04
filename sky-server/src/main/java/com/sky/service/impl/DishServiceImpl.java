@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DishServiceImpl implements DishService {
@@ -115,8 +116,13 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public List<Dish> selectByCategoryId(Long categoryId) {
-        return dishMapper.selectByCategoryId(categoryId);
+    public List<Dish> list(Long categoryId) {
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+        // TODO 此处测试
+        return dishMapper.list(dish);
     }
 
     @Override
@@ -128,5 +134,16 @@ public class DishServiceImpl implements DishService {
         dishMapper.setStatus(dish);
     }
 
-
+    public List<DishVO> listWithFlavor(Dish dish) {
+        List<Dish> dishList = dishMapper.list(dish);
+        return dishList.stream()
+                .map(d -> {
+                    DishVO dishVO = new DishVO();
+                    BeanUtils.copyProperties(d, dishVO);
+                    List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
+                    dishVO.setFlavors(flavors);
+                    return dishVO;
+                })
+                .collect(Collectors.toList());
+    }
 }

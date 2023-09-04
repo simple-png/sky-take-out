@@ -11,3 +11,11 @@ sky:
     access-key-id: LTAI5t7AHemBu3VDw9R4C3rn
     access-key-secret: gwtebnHlAugQL03rnlYmUlIF5qa65u
     bucket-name: cq-bck
+  redis:
+    host: localhost
+    port: 6379
+    password: 111111
+    database: 10
+  wechat:
+    appid: wx0337dd5514627ebd
+    secret: 1e0a52d760fb514a9c51c3d04cb7632a

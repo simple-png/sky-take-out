@@ -44,6 +44,7 @@ public interface DishMapper {
 
     /**
      * 根据id查询菜品
+     *
      * @param id
      * @return
      */
@@ -52,6 +53,7 @@ public interface DishMapper {
 
     /**
      * 根据id删除菜品
+     *
      * @param id
      */
     @Delete("delete from dish where id=#{id}")
@@ -59,21 +61,24 @@ public interface DishMapper {
 
     /**
      * 更新菜品
+     *
      * @param dish
      */
     @AutoFill(OperationType.UPDATE)
     void update(Dish dish);
 
     /**
-     * 根据分类查询菜品
-     * @param categoryId
+     * 动态条件查询菜品
+     *
+     * @param dish
      * @return
      */
-    @Select("select dish.* from dish left join category c on dish.category_id = c.id where c.id=#{categoryId}")
-    List<Dish> selectByCategoryId(Long categoryId);
+    List<Dish> list(Dish dish);
+
 
     /**
      * 根据id更新状态
+     *
      * @param dish
      */
     @Update("update dish set status=#{status} where id=#{id}")
