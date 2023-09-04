@@ -121,7 +121,6 @@ public class DishServiceImpl implements DishService {
                 .categoryId(categoryId)
                 .status(StatusConstant.ENABLE)
                 .build();
-        // TODO 此处测试
         return dishMapper.list(dish);
     }
 
